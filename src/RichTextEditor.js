@@ -24,7 +24,8 @@ export default class RichTextEditor extends Component {
     hiddenTitle: PropTypes.bool,
     enableOnChange: PropTypes.bool,
     footerHeight: PropTypes.number,
-    contentInset: PropTypes.object
+    contentInset: PropTypes.object,
+    spaceOffset: PropTypes.number, //除本组件外其余组件高度之和，处理键盘弹起场景时需要
   };
 
   static defaultProps = {
@@ -88,9 +89,16 @@ export default class RichTextEditor extends Component {
   setEditorAvailableHeightBasedOnKeyboardHeight(keyboardHeight) {
     const {top = 0, bottom = 0} = this.props.contentInset;
     const {marginTop = 0, marginBottom = 0} = this.props.style;
-    const spacing = marginTop + marginBottom + top + bottom;
+    const spacing = marginTop + marginBottom + top + bottom + (this.props.spaceOffset || 0);
 
+    /*
+    * 在键盘弹起时，原本的代码为 const spacing = marginTop + marginBottom + top + bottom;
+    * 也即是只考虑了自己的外边距，屏幕高度和键盘高度，也即是默认整个页面只有自己一个组件。
+    * 现加入spaceOffset属性，用于传入除该组件外所有外部组件高度之和，以便于让其调整至合适高度
+    * a02418wang
+    * */
     const editorAvailableHeight = Dimensions.get('window').height - keyboardHeight - spacing;
+    //console.log('space:' + spacing + 'keyboardHeight:' + keyboardHeight + 'available:' + editorAvailableHeight)
     this.setEditorHeight(editorAvailableHeight);
   }
 
@@ -540,6 +548,11 @@ export default class RichTextEditor extends Component {
   setPlatform() {
     this._sendAction(actions.setPlatform, Platform.OS);
   }
+
+  deleteRedundantTag(src) {
+    this._sendAction(actions.deleteRedundantTag, src)
+  }
+
 
   async getTitleHtml() {
     return new Promise((resolve, reject) => {

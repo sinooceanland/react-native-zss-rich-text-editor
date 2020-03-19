@@ -170,6 +170,10 @@ export const InjectedMessageHandler = `
         case '${actions.setPlatform}':
           zss_editor.setPlatform(action.data);
           break;
+          
+        case '${actions.deleteRedundantTag}':
+          zss_editor.deleteRedundantTag(action.data);
+          break;
       }
     };
   }
